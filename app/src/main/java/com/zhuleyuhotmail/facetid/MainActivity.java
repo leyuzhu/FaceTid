@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
     Button sendButton;
     Button connectButton;
     ChatClient client;
+    Thread clientThread;
     Handler mHandler;
     private String serverIp = "127.0.0.1";
     private String username = "Genius";
@@ -37,6 +38,16 @@ public class MainActivity extends Activity {
         infoip = (TextView) findViewById(R.id.infoip);
         msgView = (TextView) findViewById(R.id.msg);
         editMsg = (EditText) findViewById(R.id.msgEditText);
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                String info = (String) msg.obj;
+                msgView.append(info + "\n");
+            }
+        };
+
         sendButton = (Button) findViewById(R.id.sendButton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,8 +64,19 @@ public class MainActivity extends Activity {
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(client != null) {
+                    client.disconnect();
+                }
+                if(clientThread != null) {
+                    try {
+                        clientThread.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 client = new ChatClient(serverIp, port, username, mHandler);
-                new Thread(client).start();
+                clientThread = new Thread(client);
+                clientThread.start();
             }
         });
     }
@@ -63,26 +85,20 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         client.disconnect();
-        server.stop();
+        //server.stop();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        startService(new Intent(getBaseContext(), MyService.class));
 
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                String info = (String) msg.obj;
-                msgView.append(info + "\n");
-            }
-        };
 
+     /*
         server = new ChatServer(port, mHandler);
         new Thread(server).start();
 
-        infoip.setText(serverIp + ":" + port);
+        infoip.setText(serverIp + ":" + port);*/
     }
 
 
@@ -91,6 +107,12 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(String... params) {
+            if(client == null ){
+                Message message = new Message();
+                message.obj = "Client is not set up yet !\n";
+                mHandler.sendMessage(message);
+                return resp;
+            }
             client.sendToServer(params[0]);
             return resp;
         }
@@ -109,7 +131,7 @@ public class MainActivity extends Activity {
     }
 
     public void startService(View view) {
-        addNotification();
+        //addNotification();
         startService(new Intent(getBaseContext(), MyService.class));
     }
 

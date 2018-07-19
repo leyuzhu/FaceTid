@@ -3,21 +3,25 @@ package com.zhuleyuhotmail.facetid;
 import android.os.Handler;
 import android.os.Message;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 
 /*
  * The server that can be run both as a console application or a GUI
  */
-public class ChatServer implements Runnable {
+public class BackgroundServer implements Runnable {
     // a unique ID for each connection
     private static int uniqueId;
     // an ArrayList to keep the list of the Client
     private ArrayList<ClientThread> al;
 
-    private Handler mHandler;
+   // private Handler mHandler;
 
     // to display time
     private SimpleDateFormat sdf;
@@ -26,12 +30,13 @@ public class ChatServer implements Runnable {
     private int port;
 
     // the boolean that will be turned of to stop the server
-    private boolean keepGoing;
+    private boolean ServerKeepGoing = true;
+
+    private ServerSocket serverSocket;
 
 
-    public ChatServer(int port, Handler handler) {
-
-        this.mHandler = handler;
+    public BackgroundServer(int port) {
+        //this.mHandler = handler;
         // the port
         this.port = port;
         // to display hh:mm:ss
@@ -41,83 +46,78 @@ public class ChatServer implements Runnable {
     }
 
     public void run() {
-
         connect();
     }
 
     public void connect() {
-        keepGoing = true;
         /* create socket server and wait for connection requests */
         try {
             // the socket used by the server
-            System.out.println("before new ServerSocket(port);");
-            ServerSocket serverSocket = new ServerSocket(port);
+            if(serverSocket != null) {
+                serverSocket.close();
+            }
+
+            serverSocket = new ServerSocket(port);
 
             // infinite loop to wait for connections
-            while (keepGoing) {
+            while (ServerKeepGoing) {
                 // format message saying we are waiting
                 display("Server waiting for Clients on port " + port + ".");
-
                 Socket socket = serverSocket.accept(); // accept connection
-                // if I was asked to stop
-                if (!keepGoing)
+                // if was asked to stop
+                if (!ServerKeepGoing)
                     break;
-                ClientThread t = new ClientThread(socket); // make a thread of  it
-                al.add(t); // save it in the ArrayList
-                t.start();
+                ClientThread clientThread = new ClientThread(socket); // make a thread
+                al.add(clientThread); // save it in the ArrayList
+                clientThread.start();
             }
-            // asked to stop
-            try {
-                serverSocket.close();
-                System.out.println("after serverSocket.close();");
-                for (int i = 0; i < al.size(); ++i) {
-                    ClientThread tc = al.get(i);
-                    try {
-                        tc.sInput.close();
-                        tc.sOutput.close();
-                        tc.socket.close();
-                    } catch (IOException ioE) {
-                        // not much I can do
-                    }
-                }
-            } catch (Exception e) {
-                display("Exception closing the server and clients: " + e);
-            }
-        }
-        // something went bad
-        catch (IOException e) {
+        } catch (IOException e) {
             String msg = sdf.format(new Date()) + " Exception on new ServerSocket: " + e + "\n";
             display(msg);
         }
     }
 
     /*
-     * For the GUI to stop the server
+     * Stop the server
      */
     public void stop() {
-        keepGoing = false;
+        ServerKeepGoing = false;
+        // asked to stop
+        try {
+            if(serverSocket != null ) {
+                serverSocket.close();
+            }
+
+            for (int i = 0; i < al.size(); ++i) {
+                ClientThread tc = al.get(i);
+                tc.stopRunning();
+            }
+        } catch (Exception e) {
+            display("Exception closing the server and clients: " + e);
+        }
+
     }
 
     /*
      * Display message
      */
     private void display(String msg) {
-        String msgWithTime = sdf.format(new Date()) + " " + msg;
+        /*String msgWithTime = sdf.format(new Date()) + " " + msg;
         System.out.println(msgWithTime);
+        //activity.msg.append(msgWithTime + "\n");
         Message message = new Message();
         message.obj = msg;
-        mHandler.sendMessage(message);
+        //mHandler.sendMessage(message);*/
     }
 
     /*
-     * to broadcast a message to all Clients
+     * To broadcast a message to all Clients
      */
     private synchronized void broadcast(String message) {
         // add HH:mm:ss and \n to the message
         String time = sdf.format(new Date());
         String messageLf = time + " " + message + "\n";
-
-        System.out.print("IN Server:" + messageLf);
+        //System.out.print("IN Server:" + messageLf);
         //activity.msg.append(messageLf); // append in the room window
         display(messageLf);
 
@@ -163,13 +163,15 @@ public class ChatServer implements Runnable {
         // the date I connect
         String date;
 
+        private boolean keepGoing = true;
+
         // Constructor
         ClientThread(Socket socket) {
             // a unique id
             id = ++uniqueId;
             this.socket = socket;
             /* Creating both Data Stream */
-            //System.out.println("Thread trying to create Object Input/Output Streams");
+            System.out.println("Thread trying to create Object Input/Output Streams");
             try {
                 // create output first
                 sOutput = new ObjectOutputStream(socket.getOutputStream());
@@ -191,7 +193,7 @@ public class ChatServer implements Runnable {
         // what will run forever
         public void run() {
             // to loop until LOGOUT
-            boolean keepGoing = true;
+            //boolean keepGoing = true;
             while (keepGoing) {
                 // read a String (which is an object)
                 try {
@@ -202,12 +204,11 @@ public class ChatServer implements Runnable {
                 } catch (ClassNotFoundException e2) {
                     break;
                 }
-                // the messaage part of the ChatMessage
+                // the message part of the ChatMessage
                 String message = cm.getMessage();
 
                 // Switch on the type of message receive
                 switch (cm.getType()) {
-
                     case ChatMessage.MESSAGE:
                         broadcast(username + ": " + message);
                         break;
@@ -225,13 +226,9 @@ public class ChatServer implements Runnable {
                         break;
                 }
             }
-            // remove myself from the arrayList containing the list of the
-            // connected Clients
-            remove(id);
-            close();
         }
 
-        // try to close everything
+        // Try to close everything
         private void close() {
             // try to close the connection
             try {
@@ -271,6 +268,14 @@ public class ChatServer implements Runnable {
                 display(e.toString());
             }
             return true;
+        }
+
+        void stopRunning() {
+            keepGoing = false;
+            // remove myself from the arrayList containing the list of the
+            // connected Clients
+            remove(id);
+            close();
         }
     }
 }

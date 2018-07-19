@@ -35,9 +35,9 @@ public class ChatClient implements Runnable {
         // try to connect to the server
         try {
             socket = new Socket(server, port);
-        }
-        catch (Exception ec) {
-            display("Error connectiong to server:" + ec);
+        } catch (Exception ec) {
+            display("Error connecting to server:" + ec);
+            return;
         }
 
         String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
@@ -56,7 +56,11 @@ public class ChatClient implements Runnable {
         // Send our username to the server this is the only message that we
         // will send as a String. All other messages will be ChatMessage objects
         try {
-            sOutput.writeObject(username);
+            if(sOutput != null) {
+                sOutput.writeObject(username);
+            } else {
+                System.out.println("sOutput is null");
+            }
         } catch (IOException eIO) {
             display("Exception doing login : " + eIO);
             disconnect();
@@ -76,6 +80,11 @@ public class ChatClient implements Runnable {
      * To send a message to the server
      */
     void sendMessage(ChatMessage msg) {
+        if(sOutput == null) {
+            display("Network connection with receiver is wrong!");
+            return;
+        }
+
         try {
             sOutput.writeObject(msg);
         } catch (IOException e) {
