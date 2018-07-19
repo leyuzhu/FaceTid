@@ -97,8 +97,8 @@ public class MainActivity extends Activity {
      /*
         server = new ChatServer(port, mHandler);
         new Thread(server).start();
-
-        infoip.setText(serverIp + ":" + port);*/
+        infoip.setText(serverIp + ":" + port);
+     */
     }
 
 
