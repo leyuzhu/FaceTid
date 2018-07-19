@@ -11,11 +11,26 @@
         android:layout_gravity="center_horizontal" />
 
     <Button
+        android:id="@+id/startButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:onClick="startService"
+        android:text="Start Service" />
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="stopService"
+        android:text="Stop Service" />
+
+    <Button
         android:id="@+id/connectButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Connect..." />
+        android:text="Connect" />
 
     <Button
         android:id="@+id/sendButton"
