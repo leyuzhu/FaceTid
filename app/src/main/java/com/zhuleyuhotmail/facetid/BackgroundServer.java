@@ -3,6 +3,9 @@ package com.zhuleyuhotmail.facetid;
 import android.os.Handler;
 import android.os.Message;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -46,6 +49,11 @@ public class BackgroundServer implements Runnable {
     }
 
     public void run() {
+        // Write a message to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("message");
+        myRef.setValue("Hello, World!");
+
         connect();
     }
 

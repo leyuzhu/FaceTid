@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "841036803358",
+    "firebase_url": "https://facetid-5c6f9.firebaseio.com",
+    "project_id": "facetid-5c6f9",
+    "storage_bucket": "facetid-5c6f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841036803358:android:5e1de6988276c9bb",
+        "android_client_info": {
+          "package_name": "com.zhuleyuhotmail.facetid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841036803358-mvl9leg6k9hjvb1d05epio6oje4h3feg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBmvGdOrG4He-wAdze93hPH6LbkDo5Cu8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
