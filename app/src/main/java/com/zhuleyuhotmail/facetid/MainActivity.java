@@ -5,12 +5,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,10 +68,10 @@ public class MainActivity extends Activity {
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(client != null) {
+                if (client != null) {
                     client.disconnect();
                 }
-                if(clientThread != null) {
+                if (clientThread != null) {
                     try {
                         clientThread.join();
                     } catch (InterruptedException e) {
@@ -79,6 +83,9 @@ public class MainActivity extends Activity {
                 clientThread.start();
             }
         });
+
+        //Show the IMEI number of the device.
+        msgView.append("The IMEI is [" + getDeviceIMEI() + "]\n");
     }
 
     @Override
@@ -107,7 +114,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(String... params) {
-            if(client == null ){
+            if (client == null) {
                 Message message = new Message();
                 message.obj = "Client is not set up yet !\n";
                 mHandler.sendMessage(message);
@@ -156,6 +163,30 @@ public class MainActivity extends Activity {
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(0, builder.build());
+    }
+
+    public String getDeviceIMEI() {
+        String deviceUniqueIdentifier = null;
+        TelephonyManager tm = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+        if (null != tm) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                deviceUniqueIdentifier = "Default_IMEI_NO_Permission";
+                //return TODO;
+            } else {
+                deviceUniqueIdentifier = tm.getDeviceId();
+            }
+        }
+        if (null == deviceUniqueIdentifier || 0 == deviceUniqueIdentifier.length()) {
+            deviceUniqueIdentifier = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        }
+        return deviceUniqueIdentifier;
     }
 
 }
