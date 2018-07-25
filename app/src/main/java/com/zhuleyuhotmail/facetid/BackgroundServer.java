@@ -1,7 +1,10 @@
 package com.zhuleyuhotmail.facetid;
 
+import android.app.Activity;
+import android.app.Service;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -25,6 +28,7 @@ public class BackgroundServer implements Runnable {
     private ArrayList<ClientThread> al;
 
    // private Handler mHandler;
+   private MyService service;
 
     // to display time
     private SimpleDateFormat sdf;
@@ -38,10 +42,12 @@ public class BackgroundServer implements Runnable {
     private ServerSocket serverSocket;
 
 
-    public BackgroundServer(int port) {
+    public BackgroundServer(int port, MyService service) {
         //this.mHandler = handler;
         // the port
         this.port = port;
+        this.service = service;
+
         // to display hh:mm:ss
         sdf = new SimpleDateFormat("HH:mm:ss");
         // ArrayList for the Client list
@@ -70,11 +76,17 @@ public class BackgroundServer implements Runnable {
             // infinite loop to wait for connections
             while (ServerKeepGoing) {
                 // format message saying we are waiting
-                display("Server waiting for Clients on port " + port + ".");
+               // display("Server waiting for Clients on port " + port + ".");
+               /* Thread.sleep(3000);
+                Log.i("Server waiting", "Ohhhhhhh");*/
                 Socket socket = serverSocket.accept(); // accept connection
                 // if was asked to stop
                 if (!ServerKeepGoing)
                     break;
+
+                //Start the activity and GUI
+                service.StartDialogActivity();
+
                 ClientThread clientThread = new ClientThread(socket); // make a thread
                 al.add(clientThread); // save it in the ArrayList
                 clientThread.start();
@@ -82,7 +94,9 @@ public class BackgroundServer implements Runnable {
         } catch (IOException e) {
             String msg = sdf.format(new Date()) + " Exception on new ServerSocket: " + e + "\n";
             display(msg);
-        }
+        }/* catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
     }
 
     /*
@@ -110,12 +124,12 @@ public class BackgroundServer implements Runnable {
      * Display message
      */
     private void display(String msg) {
-        /*String msgWithTime = sdf.format(new Date()) + " " + msg;
-        System.out.println(msgWithTime);
+        String msgWithTime = sdf.format(new Date()) + " " + msg;
+        //System.out.println(msgWithTime);
         //activity.msg.append(msgWithTime + "\n");
         Message message = new Message();
         message.obj = msg;
-        //mHandler.sendMessage(message);*/
+        service.displayMsg(message);
     }
 
     /*
@@ -179,7 +193,7 @@ public class BackgroundServer implements Runnable {
             id = ++uniqueId;
             this.socket = socket;
             /* Creating both Data Stream */
-            System.out.println("Thread trying to create Object Input/Output Streams");
+            //System.out.println("Thread trying to create Object Input/Output Streams");
             try {
                 // create output first
                 sOutput = new ObjectOutputStream(socket.getOutputStream());

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Facetid</string>
     <string name="title_activity_notification_view">NotificationView</string>
+    <string name="title_activity_dialgo">DialgoActivity</string>
 </resources>

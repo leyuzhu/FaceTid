@@ -3,6 +3,8 @@
     package="com.zhuleyuhotmail.facetid">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -21,21 +23,35 @@
 
         <service android:name=".MyService" />
 
-        <receiver android:name=".ReceiverCall">
+        <receiver
+            android:name=".ReceiverCall"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.android.techtrainner" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".MyBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- <action android:name="android.intent.action.INPUT_METHOD_CHANGED" /> -->
             </intent-filter>
         </receiver>
 
         <activity
             android:name=".NotificationView"
             android:label="@string/title_activity_notification_view">
-           <!-- android:parentActivityName=".MainActivity">
+
+            <!--
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>-->
+                android:value=".MainActivity"/>
+            -->
         </activity>
+        <activity android:name=".DialogActivity"></activity>
     </application>
 
 </manifest>

@@ -4,17 +4,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/infoip"
+    <Button
+        android:id="@+id/laucnhButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+        android:onClick="startClient"
+        android:text="Start Client" />
+
 
     <Button
         android:id="@+id/startButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:onClick="startService"
         android:text="Start Service" />
 
@@ -24,37 +25,6 @@
         android:layout_height="wrap_content"
         android:onClick="stopService"
         android:text="Stop Service" />
-
-    <Button
-        android:id="@+id/connectButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Connect" />
-
-    <Button
-        android:id="@+id/sendButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Send" />
-
-    <EditText
-        android:id="@+id/msgEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:hint="Input message" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <TextView
-            android:id="@+id/msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-
 
 </LinearLayout>
 
